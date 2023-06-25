@@ -162,3 +162,4 @@ def minesweeper():
 
 
 minesweeper()
+input()
