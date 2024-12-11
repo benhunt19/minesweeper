@@ -4,31 +4,12 @@ import time
 import psycopg2
 import datetime
 
-con =psycopg2.connect(
-    user='postgres',
-    password='password',
-    host='127.0.0.1',
-    port='5432',
-    database='postgres'
-)
-
-def minesweeper():
+def minesweeper(db):
 
     username = input('Enter your name: ')
-    cur = con.cursor()
 
-    cur.execute(f"SELECT * FROM minesweeper order by score asc limit 5")
-    #print('Name:', 'Score','Date', 'Size', 'Mines')
-    leaderboard = np.array(cur.fetchall())
-    print('The current leaderboard\n','Name:', 'Score:','           Date:', '         Size:', 'Mines:\n' ,leaderboard)
-
-
-    for i in range(len(leaderboard)):
-        if leaderboard[i][0] == username:
-            cur.execute(f"SELECT * from minesweeper where name='{username}' order by score asc")
-            print(f'\n{username}, your highscore is: {cur.fetchall()[0][1]}\n')
-            #print(cur.fetchall()[0][1])
-            break
+    if db:
+        innit_leaderboard(username)
 
     size = int(input('What size grid would you like ? (n x n): '))
     mines = int(input('How many mines would you like?: '))
@@ -37,7 +18,6 @@ def minesweeper():
     for i in range(3):
         print(3 - i)
         time.sleep(1)
-
 
     TIME = time.time()
     emptymat = np.zeros((int(size), int(size)))
@@ -177,21 +157,13 @@ def minesweeper():
                         total_time = int(time.time() - TIME)
                         print('The elapsed time was:', total_time, ' seconds !')
 
-                        def create_row(data_list):
-                            value_string = ", ".join(map(str, data_list))
-                            return f""" 
-                            INSERT INTO minesweeper
-                            VALUES ({value_string})
-                            """
-
-                        cur.execute(create_row([f"'{username}'", total_time, f"'{datetime.datetime.now()}'", size, mines]))
-                        cur.execute("SELECT * FROM minesweeper order by score asc")
-
-                        print(f"the new leaderboard is:\n", np.array(cur.fetchall()))
-
-                        con.commit()
-                        cur.close()
-                        con.close()
+                        if db:
+                            cur.execute(create_row([f"'{username}'", total_time, f"'{datetime.datetime.now()}'", size, mines]))
+                            cur.execute("SELECT * FROM minesweeper order by score asc")
+                            print(f"the new leaderboard is:\n", np.array(cur.fetchall()))
+                            con.commit()
+                            cur.close()
+                            con.close()
                         return
                     else:
                         print('Unfortunately (at least) one of your flags is wrong...')
@@ -201,4 +173,32 @@ def minesweeper():
 
             print('GAME: \n', qmat2)
 
-minesweeper()
+def create_row(data_list):
+    value_string = ", ".join(map(str, data_list))
+    return f""" 
+    INSERT INTO minesweeper
+    VALUES ({value_string})
+    """
+    
+def innit_leaderboard(username):
+    global con
+    con = psycopg2.connect(
+        user='postgres',
+        password='password',
+        host='**removed**',
+        port='5432',
+        database='postgres'
+    )
+    global cur
+    cur = con.cursor()
+    cur.execute(f"SELECT * FROM minesweeper order by score asc limit 5")
+    leaderboard = np.array(cur.fetchall())
+    print('The current leaderboard\n','Name:', 'Score:','           Date:', '         Size:', 'Mines:\n' ,leaderboard)
+    for i in range(len(leaderboard)):
+        if leaderboard[i][0] == username:
+            cur.execute(f"SELECT * from minesweeper where name='{username}' order by score asc")
+            print(f'\n{username}, your highscore is: {cur.fetchall()[0][1]}\n')
+            break
+
+
+minesweeper(False)
