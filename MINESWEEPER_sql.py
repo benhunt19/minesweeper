@@ -175,10 +175,7 @@ def minesweeper(db):
 
 def create_row(data_list):
     value_string = ", ".join(map(str, data_list))
-    return f""" 
-    INSERT INTO minesweeper
-    VALUES ({value_string})
-    """
+    return f"INSERT INTO minesweeper VALUES ({value_string})"
     
 def innit_leaderboard(username):
     global con
