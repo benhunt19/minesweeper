@@ -49,10 +49,16 @@ def minesweeper(db=True):
     """
     Description:
     Main executable running function, the process is the following:
-    1. Initialise the database and get current highscores
-    2. Initialise the various display and non display data grids
+    1. Initialise the database and get current highscores.
+    2. Initialise the various display and non display data grids.
     3. Start the main running loop, prompting the user to enter
-       their coordinates and 
+       their coordinates and guess type (f = 'flag', g = 'guess').
+    4. Based on their guess, update the grid, displaying the current
+       guesses and visible points. The regular rules of minesweeper
+       will apply.
+    5. Once the user has successfully (or unsuccessfully) played
+       finished playing the game, update the database with new 
+       entry and display it to the user.
     
     """
     # Take the users username
